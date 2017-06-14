@@ -114,7 +114,6 @@ bool HelloWorld::init()
     };
     Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, label1);
     */
-       
         return true;
 }
 

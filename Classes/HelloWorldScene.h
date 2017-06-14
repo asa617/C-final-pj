@@ -17,7 +17,6 @@ public:
     void menuItemLevelCallback(Ref* pSender);
     void menuItemAboutCallback(Ref* pSender);
     void menuCloseCallback(cocos2d::Ref* pSender);
-    
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 };

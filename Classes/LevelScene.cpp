@@ -7,6 +7,8 @@
 //
 
 #include "LevelScene.hpp"
+#include "OperateLayer.h"
+#include "Hero.h"
 
 Scene* LevelScene::createScene(){
     auto scene = Scene::create();
