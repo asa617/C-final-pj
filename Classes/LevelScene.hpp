@@ -16,7 +16,8 @@
 USING_NS_CC_EXT;
 USING_NS_CC;
 
-class LevelScene:public Layer{
+class LevelScene:public Layer
+{
 public:
     static Scene* createScene();
 	//≥ı ºªØ

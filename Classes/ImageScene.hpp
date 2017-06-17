@@ -14,7 +14,7 @@
 #include "extensions/cocos-ext.h"
 #include "Hero.h"
 #include "ImageScene.hpp"
-#include "cocostudio/CocoStudio.h"
+#include "editor-support/cocostudio/CocoStudio.h"
 
 
 USING_NS_CC;

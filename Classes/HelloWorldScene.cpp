@@ -8,24 +8,14 @@ USING_NS_CC;
 
 Scene* HelloWorld::createScene()
 {
-    // 'scene' is an autorelease object
     auto scene = Scene::create();
-    
-    // 'layer' is an autorelease object
     auto layer = HelloWorld::create();
-
-    // add layer as a child to scene
     scene->addChild(layer);
-
-    // return the scene
     return scene;
 }
 
-// on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
-    //////////////////////////////
-    // 1. super init first
     if ( !Layer::init() )
     {
         return false;
@@ -34,11 +24,7 @@ bool HelloWorld::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
-
-    // add a "close" icon to exit the progress. it's an autorelease object
+    //右下角退出游戏按键
     auto closeItem = MenuItemImage::create(
                                            "CloseNormal.png",
                                            "CloseSelected.png",
@@ -47,51 +33,43 @@ bool HelloWorld::init()
     closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width/2 ,
                                 origin.y + closeItem->getContentSize().height/2));
 
-    // create menu, it's an autorelease object
     auto menu = Menu::create(closeItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
-
-    /////////////////////////////
-    // 3. add your codes below...
-
-    // add a label shows "Hello World"
-    // create and initialize a label
     
+    //标题
     auto label = Label::createWithTTF("-W A R R I O R-", "fonts/Marker Felt.ttf", 65);
     
-    // position the label on the center of the screen
     label->setPosition(Vec2(origin.x + visibleSize.width/2,
                             origin.y + visibleSize.height/2 + label->getContentSize().height*3));
 
-    // add the label as a child to this layer
     this->addChild(label, 1);
 
-    // add "HelloWorld" splash screen"
     auto sprite = Sprite::create("home.jpeg");
-
-    // position the sprite on the center of the screen
+    
+    //强行适配窗体
     sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
     auto size = sprite->getContentSize();
     float scaleX = (float)visibleSize.width/(float)size.width;
     float scaleY = (float)visibleSize.height/(float)size.height;
     sprite->setScale(scaleX, scaleY);
 
-    // add the sprite as a child to this layer
     this->addChild(sprite, 0);
     
+    //添加菜单选项
+    //开始游戏图片菜单
     auto startMenuItem = MenuItemImage::create(
                                                "playgameA.png",
                                                "playgameB.png",
                                                CC_CALLBACK_1(HelloWorld::menuItemStartCallback, this));
     startMenuItem->setPosition(450,390);
-    
+    //设置图片菜单
     auto settingMenuItem = MenuItemImage::create(
                                                "optionA.png",
                                                "optionB.png",
                                                CC_CALLBACK_1(HelloWorld::menuItemSettingCallback, this));
     settingMenuItem->setPosition(450,190);
-    
+    //选关图片菜单
     auto levelMenuItem = MenuItemImage::create(
                                                  "levelA.png",
                                                  "levelB.png",
@@ -102,53 +80,86 @@ bool HelloWorld::init()
     mu->setPosition(Vec2::ZERO);
     this->addChild(mu);
     
-    /*auto label1 = Label::createWithTTF("show next scene", "fonts/arial.ttf", 36);
-    addChild(label1);
-    label1->setPosition(visibleSize.width/2, visibleSize.height/2);
-    auto listener = EventListenerTouchOneByOne::create();
-    listener->onTouchBegan = [label1](Touch* t,Event* e){
-        if(label1->getBoundingBox().containsPoint(t->getLocation())){
-            Director::getInstance()->replaceScene(TransitionFadeBL::create(1, ImageScene::createScene()));
-        }
-        return false;
-    };
-    Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, label1);
-    */
+    //添加火焰粒子效果
+    ParticleSystem* particleSystem1 = ParticleFire::create();
+    particleSystem1->setPosition(220, 395);
+    this->addChild(particleSystem1);
+    
+    ParticleSystem* particleSystem2 = ParticleFire::create();
+    particleSystem2->setPosition(700, 395);
+    this->addChild(particleSystem2);
+    
         return true;
 }
 
-
+//退出回调函数
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
-    //Close the cocos2d-x game scene and quit the application
+    //退出游戏
     Director::getInstance()->end();
 
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     exit(0);
 #endif
-    
-    /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
-    
-    //EventCustom customEndEvent("game_scene_close_event");
-    //_eventDispatcher->dispatchEvent(&customEndEvent);
-    
-    
 }
 
+//设置回调函数
 void HelloWorld::menuItemSettingCallback(Ref* pSender)
 {
     auto sc = SettingScene::createScene();
-    Director::getInstance()->pushScene(sc);
+    auto tsc = TransitionSlideInL::create(1.0f, sc);
+    Director::getInstance()->pushScene(tsc);
+    SimpleAudioEngine::getInstance()->playEffect("button.wav");
 }
 
+//开始游戏回调函数
 void HelloWorld::menuItemStartCallback(Ref* pSender)
 {
     auto sc = ImageScene::createScene();
-    Director::getInstance()->pushScene(sc);
+    auto tsc = TransitionTurnOffTiles::create(1.0f, sc);
+    Director::getInstance()->pushScene(tsc);
+    SimpleAudioEngine::getInstance()->playEffect("button.wav");
 }
 
+//选关回调函数
 void HelloWorld::menuItemLevelCallback(Ref* pSender)
 {
     auto sc = LevelScene::createScene();
-    Director::getInstance()->pushScene(sc);
+    auto tsc = TransitionSlideInL::create(1.0f, sc);
+    Director::getInstance()->pushScene(tsc);
+    SimpleAudioEngine::getInstance()->playEffect("button.wav");
+}
+
+void HelloWorld::onEnter()
+{
+    Layer::onEnter();
+    log("HelloWorld onEnter");
+}
+
+void HelloWorld::onEnterTransitionDidFinish()
+{
+    Layer::onEnterTransitionDidFinish();
+    log("HelloWorld onEnterTransitionDidFinish");
+    //播放
+    SimpleAudioEngine::getInstance()->playBackgroundMusic("background1.mp3",true);
+}
+
+void HelloWorld::onExit()
+{
+    Layer::onExit();
+    log("HelloWorld onExit");
+}
+
+void HelloWorld::onExitTransitionDidStart()
+{
+    Layer::onExitTransitionDidStart();
+    log("HelloWorld onExitTransitionDidStart");
+}
+
+void HelloWorld::cleanup()
+{
+    Layer::cleanup();
+    log("HelloWorld cleanup");
+    //停止
+    SimpleAudioEngine::getInstance()->stopBackgroundMusic("background1.mp3");
 }

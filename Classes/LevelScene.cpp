@@ -10,7 +10,8 @@
 #include "OperateLayer.h"
 #include "Hero.h"
 
-Scene* LevelScene::createScene(){
+Scene* LevelScene::createScene()
+{
     auto scene = Scene::create();
     auto layer = LevelScene::create();
     scene->addChild(layer);

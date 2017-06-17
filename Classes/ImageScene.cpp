@@ -15,14 +15,18 @@
 class Hero;
 
 
-Scene* ImageScene::createScene(){ //创建场景
+Scene* ImageScene::createScene()
+{
+    //创建场景
     auto scene = Scene::create();
     auto layer = ImageScene::create();
     scene->addChild(layer);
     return scene;
 }
 
-bool ImageScene::init(){   //场景初始化
+bool ImageScene::init()
+{
+    //场景初始化
 	if (!Layer::init())
 	return false;
 	//地图载入
