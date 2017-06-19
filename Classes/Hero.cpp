@@ -65,8 +65,8 @@ void Hero::Attack(int AttackType)
 	{
 		pAction = m_AttackJump;
 		// 当前位置跳跃
-		Action *jump = JumpTo::create(0.6, ccpSub(getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)), 120, 1);
-		runAction(jump);
+		Action *jump = JumpTo::create(0.6, ccpSub(m_HeroSprite->getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)), 120, 1);
+		m_HeroSprite->runAction(jump);
 		m_AttackRange = 300;
 	}
 	break;
@@ -74,8 +74,8 @@ void Hero::Attack(int AttackType)
 	{
 		pAction = m_AttackTerror;
 		// 当前位置移动
-		Action *move = MoveTo::create(0.3, ccpSub(getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)));
-		runAction(move);
+		Action *move = MoveTo::create(0.3, ccpSub(m_HeroSprite->getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)));
+		m_HeroSprite->runAction(move);
 		m_AttackRange = 300;
 	}
 	break;

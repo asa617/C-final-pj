@@ -7,6 +7,7 @@
 //
 
 #include "SettingScene.hpp"
+
 USING_NS_CC;
 using namespace CocosDenshion;
 
@@ -74,8 +75,20 @@ bool SettingScene::init()
     auto mn = Menu::create(soundToggleMenuItem,musicToggleMenuItem,okMenuItem,NULL);
     mn->setPosition(Vec2::ZERO);
     this->addChild(mn);
-
     
+    //设置开关菜单状态
+    UserDefault* defaults = UserDefault::getInstance();
+    if(defaults->getBoolForKey(MUSIC_KEY)){
+        musicToggleMenuItem->setSelectedIndex(0);
+    }else{
+        musicToggleMenuItem->setSelectedIndex(1);
+    }
+    
+    if(defaults->getBoolForKey(SOUND_KEY)){
+        soundToggleMenuItem->setSelectedIndex(0);
+    }else{
+        soundToggleMenuItem->setSelectedIndex(1);
+    }
     
     
     return true;
@@ -84,36 +97,36 @@ bool SettingScene::init()
 void SettingScene::menuOkCallback(Ref* pSender)
 {
     Director::getInstance()->popScene();
-    if(isEffect){
-        SimpleAudioEngine::getInstance()->playEffect("button.wav");
+    
+    if(getBoolFromXML(SOUND_KEY)){
+        PLAYEFFECT;
     }
 }
 
 void SettingScene::menuSoundToggleCallback(Ref* pSender)
 {
     auto soundToggleMenuItem = (MenuItemToggle*)pSender;
-    if(isEffect){
-        SimpleAudioEngine::getInstance()->playEffect("button.wav");
-    }
+    log("soundToggleMenuItem %d",soundToggleMenuItem->getSelectedIndex());
     
-    if(soundToggleMenuItem->getSelectedIndex() == 1){//选中状态 off->on
-        isEffect = false;
+    if(getBoolFromXML(SOUND_KEY)){
+        setBoolToXML(SOUND_KEY,false);
     }else{
-        isEffect = true;
-        SimpleAudioEngine::getInstance()->playEffect("button.wav");
+        setBoolToXML(SOUND_KEY,true);
+        PLAYEFFECT;
     }
 }
 
 void SettingScene::menuMusicToggleCallback(Ref* pSender)
 {
     auto musicToggleMenuItem = (MenuItemToggle*)pSender;
-    if(musicToggleMenuItem->getSelectedIndex() == 1){//选中状态 off->on
-        SimpleAudioEngine::getInstance()->stopBackgroundMusic("background.mp3");
+    log("musicToggleMenuItem %d",musicToggleMenuItem->getSelectedIndex());
+    
+    if(getBoolFromXML(MUSIC_KEY)){
+        setBoolToXML(MUSIC_KEY,false);
+        SimpleAudioEngine::getInstance()->stopBackgroundMusic();
     }else{
-        SimpleAudioEngine::getInstance()->playBackgroundMusic("background.mp3");
-    }
-    if(isEffect){
-        SimpleAudioEngine::getInstance()->playEffect("button.wav");
+        setBoolToXML(MUSIC_KEY,true);
+        PLAYEFFECT;
     }
 }
 
@@ -127,9 +140,11 @@ void SettingScene::onEnterTransitionDidFinish()
 {
     Layer::onEnterTransitionDidFinish();
     log("Setting onEnterTransitonDidFinsh");
-    isEffect = true;
-    //播放
-    SimpleAudioEngine::getInstance()->playBackgroundMusic("background1.mp3");
+    
+    if(getBoolFromXML(MUSIC_KEY)){
+        //播放
+        SimpleAudioEngine::getInstance()->playBackgroundMusic("background1.mp3",true);
+    }
 }
 
 void SettingScene::onExit()

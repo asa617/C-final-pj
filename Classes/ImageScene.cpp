@@ -10,23 +10,21 @@
 #include "cocos2d.h"
 #include "Hero.h"
 #include "OperateLayer.h"
+#include "GlobalDefine.h"
+#include "MonsterControl.h"
 
 
 class Hero;
 
 
-Scene* ImageScene::createScene()
-{
-    //创建场景
+Scene* ImageScene::createScene(){ //创建场景
     auto scene = Scene::create();
     auto layer = ImageScene::create();
     scene->addChild(layer);
     return scene;
 }
 
-bool ImageScene::init()
-{
-    //场景初始化
+bool ImageScene::init(){   //场景初始化
 	if (!Layer::init())
 	return false;
 	//地图载入
@@ -45,10 +43,23 @@ bool ImageScene::init()
 	m_pHero->setPosition(100, 250);
 	this->addChild(m_pHero);
 
+	MonsterControl *monster = MonsterControl::createWithHeroAndMap(m_pHero,BgMap);
+
 	//添加按钮
 	OperateLayer *pOperateLayer = OperateLayer::create();
 	pOperateLayer->setDelegate(this);
 	addChild(pOperateLayer);
+
+	//暂停按钮
+	auto pauseGameItem = MenuItemImage::create(
+		                                       "pause.png",
+		                                       "pause.png",
+		                                       CC_CALLBACK_1(ImageScene::gamePauseCallback, this));
+    pauseGameItem->setScale(0.15);
+	pauseGameItem->setPosition(visibleSize.width-50,visibleSize.height-45);
+    auto menu = Menu::create(pauseGameItem,nullptr);
+    menu->setPosition(Vec2::ZERO);
+    this->addChild(menu,3);
 
 	//添加血条、能量条
 	HpAndMpBg = Sprite::create("hpmpbg.png");
@@ -79,6 +90,8 @@ bool ImageScene::init()
 void ImageScene::attackButtonClick(int nAttackType)
 {
 	m_pHero->Attack(nAttackType);
-//	Log("------------attackButtonClick");
 }
 
+void ImageScene::gamePauseCallback(Ref* pSender) {
+    Director::getInstance()->pause();
+}

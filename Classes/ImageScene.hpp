@@ -4,6 +4,7 @@
 //
 //  Created by -T.c on 2017/5/26.
 //  Added by loahao on 2017/6/9
+//  Added by Xuan_32 on 2017/6/11
 //  The main layer 
 
 #ifndef ImageScene_hpp
@@ -11,23 +12,21 @@
 
 #include <stdio.h>
 #include "cocos2d.h"
-#include "extensions/cocos-ext.h"
+#include "cocos-ext.h"
 #include "Hero.h"
-#include "ImageScene.hpp"
 #include "editor-support/cocostudio/CocoStudio.h"
-
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 USING_NS_CC_EXT;
 
-#include "SimpleAudioEngine.h"
 using namespace CocosDenshion;
-
 using namespace cocos2d::extension;
 
 class Hero;
 class HpAndMp;
-class ImageScene:public Layer{
+class ImageScene:public Layer
+{
 public:
     static Scene* createScene();//创建场景
     virtual bool init();
@@ -36,6 +35,8 @@ public:
 	void attackButtonClick(int nAttackType); //按键点击触发动作
 	//virtual void update(float Delta);
 
+	// 暂停
+	void gamePauseCallback(Ref* pSender);
 
     CREATE_FUNC(ImageScene);
 private:
