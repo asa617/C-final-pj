@@ -10,9 +10,9 @@
 #include "cocos2d.h"
 #include "Hero.h"
 #include "OperateLayer.h"
-#include"PauseLayer.h"
 #include "GlobalDefine.h"
 #include "MonsterControl.h"
+#include "AttackMonitor.h"
 
 
 class Hero;
@@ -52,12 +52,15 @@ bool ImageScene::init(){   //场景初始化
 	addChild(pOperateLayer);
 
 	//暂停按钮
-	auto puaseGameItem = MenuItemSprite::create(
-		Sprite::create("pauseA.png"),
-		Sprite::create("pauseB.png"),
-		CC_CALLBACK_1(ImageScene::gamePause, this)); // Pause
-	puaseGameItem->setPosition(WINSIZE.width - 50, WINSIZE.height - 48);
-
+	auto pauseGameItem = MenuItemImage::create(
+		                                       "pause.png",
+		                                       "pause.png",
+		                                       CC_CALLBACK_1(ImageScene::gamePauseCallback, this));
+    pauseGameItem->setScale(0.15);
+	pauseGameItem->setPosition(visibleSize.width-50,visibleSize.height-45);
+    auto menu = Menu::create(pauseGameItem,nullptr);
+    menu->setPosition(Vec2::ZERO);
+    this->addChild(menu,3);
 
 	//添加血条、能量条
 	HpAndMpBg = Sprite::create("hpmpbg.png");
@@ -88,9 +91,16 @@ bool ImageScene::init(){   //场景初始化
 void ImageScene::attackButtonClick(int nAttackType)
 {
 	m_pHero->Attack(nAttackType);
-//	Log("------------attackButtonClick");
 }
 
-void ImageScene::gamePause(Ref* pSender) {
-	Director::getInstance()->pause();
+void ImageScene::gamePauseCallback(Ref* pSender) {
+    Director::getInstance()->pause();
+}
+
+void ImageScene::update(float Delta)
+{
+	if (AttackMonitor::MonsterAttackMonitor(m_pHero))
+	{
+		HpBar->setPercentage(m_pHero->percentage);
+	}
 }

@@ -12,6 +12,7 @@
 #include "Hero.h"
 #include "ImageScene.hpp"
 #include "GlobalDefine.h"
+#include "GlobalData.h"
 USING_NS_CC;
 
 
@@ -33,11 +34,16 @@ Sprite* Monster::GetSprite() {
 	return m_MonsterSprite;
 }
 
+const char* Monster::getMonsterName() {
+	return Monster_name;
+}
+
 //初始化怪兽的各种属性
-void Monster::InitMonsterSprite(char *name, char*attack, char* die, char *walk, char* dieLast, int m_iLevel) {
+void Monster::InitMonsterSprite(char *name, char*attack, char* hurt,char* die, char *walk, char* dieLast, int m_iLevel) {
 	Monster_name = name;
 	Monster_attack = attack;
 	Monster_walk = walk;
+	Monster_hurt = hurt;
 	Monster_die = die;
 	Die_name = dieLast;
 
@@ -109,7 +115,7 @@ void Monster::AttackEnd()
 }
 
 // 受伤
-void Monster::HurtAnimation(const char *name_each, bool run_directon, float delay, int iLoops)
+void Monster::HurtAnimation(const char *name_each, bool run_directon, float delay, int iLoops, int hurt_Type )
 {
 	if (IsHurt || IsDead)
 		return;
@@ -122,12 +128,15 @@ void Monster::HurtAnimation(const char *name_each, bool run_directon, float dela
 		//m_MonsterSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(Monster_name));//恢复精灵原来的贴图样子
 		m_MonsterSprite->Sprite::create(Monster_name);
 		m_MonsterSprite->setFlipX(MonsterDirection);
-		this->addChild(m_MonsterSprite);
 		IsRunning = false;
 		IsAttack = false;
 	}
+	
+	
+	hurtType = hurt_Type;
 
-	Animate* action = ActionTool::animationWithFrameName(name_each, 1, delay);
+
+	Animate* action = ActionTool::animationWithFrameAndNum(Monster_hurt, 3, 0.3f);
 	// 创建回调动作，受伤动画结束调用HurtEnd()
 	CallFunc* callFunc = CallFunc::create(this, callfunc_selector(Monster::HurtEnd));
 	// 创建连续动作
@@ -141,18 +150,17 @@ void Monster::HurtEnd()
 {
 	IsHurt = false;
 
-	/*狂暴状态效果待定
 	if (my_hero->m_Crazy)
 	{
 		m_iHP -= 100;
 	}
-	else*/ 
-		m_iHP -= 30;
+	else
+		m_iHP -= 30*(1 + 0.2*iLevel + 0.1*(hurtType-1));
 
 	if (m_iHP <= 0)
 	{
 		//播放怪物死亡
-		DeadAnimation(Monster_die, MonsterDirection, 0.1f, 1.0f);
+		DeadAnimation(Monster_die, MonsterDirection, 0.5f, 1.0f);
 	}
 	log("Monster Hurt");
 }
@@ -161,7 +169,7 @@ void Monster::DeadAnimation(const char *name_each, bool run_directon, float dela
 {
 	IsDead = true;
 	// 创建动作
-	Animate* action = ActionTool::animationWithFrameName(name_each, 1, delay);
+	Animate* action = ActionTool::animationWithFrameAndNum(name_each, 5, delay);
 	// 创建回调动作，死亡结束后调用deadact()
 	CCCallFunc* callFunc = CCCallFunc::create(this, callfunc_selector(Monster::DeadEnd));
 	// 创建连续动作
@@ -184,6 +192,7 @@ void Monster::DeadEnd()
 	//m_MonsterSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(Die_name); // 恢复死亡的样子
 	m_MonsterSprite = Sprite::create(Die_name);
 	m_MonsterSprite->setFlipX(MonsterDirection);
+	m_MonsterSprite->setPosition(Vec2(m_MonsterSprite->getPositionX(), m_MonsterSprite->getPositionY() - 50));
 	this->addChild(m_MonsterSprite);
 
 	// 怪物闪下再死亡
@@ -206,32 +215,46 @@ void Monster::FollowRun(Hero* m_hero)
 {
 
 	// 得到两点x的距离
-	float x = (my_hero->m_HeroSprite->getPositionX()+my_hero->getPositionX()) - this->getPositionX();
+	float x = (my_hero->m_HeroSprite->getPositionX() + my_hero->getPositionX()) - this->getPositionX();//图片节点差异;
 	float y = (my_hero->m_HeroSprite->getPositionY()+my_hero->getPositionY()) - this->getPositionY();
 
 	// 先计算怪物和英雄的距离
 	dis_x = fabs(x);
 	dis_y = fabs(y);
 
-	if (x >= 1280)// 当怪物与英雄距离超过1280
+	if (x >= 450)// 当怪物与英雄距离超过450
 		return;
-	if (dis_x <= 30)// 在怪物攻击范围内，怪物停止移动
+	if (dis_x <= 30 && dis_y <=5)// 在怪物攻击范围内，怪物停止移动
 	{
 		this->StopAnimation();// 停止跑动
-		scheduleOnce(schedule_selector(Monster::JudegeAttack), 2.5f); //以一定的概率判断是是否出动攻击
+		//攻击时判断是否面对英雄
+		if(MonsterDirection == my_hero->HeroPath)
+		{
+			MonsterDirection = !MonsterDirection;
+			m_MonsterSprite->setFlippedX(MonsterDirection);//设置方向
+
+		}
+		scheduleOnce(schedule_selector(Monster::JudegeAttack), 2.5f); 
 		return;
 	}
 
-	if (x < -30 && y <= 0)// 判断怪物坐标和英雄的距离
+	if (x < -5 )// 判断怪物坐标和英雄的距离
 	{
 		MonsterDirection = false;
 		m_MonsterSprite->setFlippedX(MonsterDirection);// 设置方向
 		if (IsAttack)
 			return;
 		this->SetAnimation(Monster_walk, MonsterDirection, 0.1f, -1);// 播放动画
-		this->setPosition(this->getPositionX() - 1.5, this->getPositionY() - 1.5);// 怪物向英雄移动
+		this->setPosition(this->getPositionX() -1, this->getPositionY());// 怪物向英雄移动
 	}
-	else if (x > 30 && y <= 0)
+	if (y > 5)
+	{
+		if (IsAttack)
+			return;
+		this->SetAnimation(Monster_walk, MonsterDirection, 0.1f, -1);// 播放动画
+		this->setPosition(this->getPositionX(), this->getPositionY() +1);// 怪物向英雄移动
+	}
+	if (x > 5)
 	{
 
 		MonsterDirection = true;
@@ -239,27 +262,14 @@ void Monster::FollowRun(Hero* m_hero)
 		if (IsAttack)
 			return;
 		this->SetAnimation(Monster_walk, MonsterDirection, 0.1f, -1);// 播放动画
-		this->setPosition(this->getPositionX() + 1.5, this->getPositionY() - 1.5);
+		this->setPosition(this->getPositionX() + 1, this->getPositionY());
 	}
-	else if (x > 30 && y >= 0)
+	if (y < -5)
 	{
-
-		MonsterDirection = true;
-		m_MonsterSprite->setFlippedX(MonsterDirection);// 设置方向
 		if (IsAttack)
 			return;
 		this->SetAnimation(Monster_walk, MonsterDirection, 0.1f, -1);// 播放动画
-		this->setPosition(this->getPositionX() + 1.5, this->getPositionY() + 1.5);
-	}
-	else if (x < -30 && y >= 0)
-	{
-
-		MonsterDirection = false;
-		m_MonsterSprite->setFlippedX(MonsterDirection);// 设置方向
-		if (IsAttack)
-			return;
-		this->SetAnimation(Monster_walk, MonsterDirection, 0.1f, -1);// 播放动画
-		this->setPosition(this->getPositionX() - 1.5, this->getPositionY() + 1.5);
+		this->setPosition(this->getPositionX(), this->getPositionY() -1);
 	}
 
 }

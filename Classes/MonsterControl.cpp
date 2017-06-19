@@ -42,7 +42,7 @@ bool MonsterControl::initMonster(Hero* hero, Sprite* map) {
 	monsterShowList.clear();
 
 	auto m_pMonster1 = Monster::create();
-	m_pMonster1->InitMonsterSprite("Robot3.png", "RobotAttack", "monsterDie", "RobotRun", "RobotAttack4.png", 1);
+	m_pMonster1->InitMonsterSprite("Robot3.png", "RobotAttack","Robothurt", "monsterDie", "RobotRun", "monsterDie5.png", 1);
 	m_pMonster1->setVisible(true);
 	m_pMonster1->setPosition(500, 300);
 	m_map->addChild(m_pMonster1);
@@ -51,14 +51,14 @@ bool MonsterControl::initMonster(Hero* hero, Sprite* map) {
 	m_bFlag1 = false;
 	//µÚ¶þ²¨
 	auto m_pMonster2 = Monster::create();
-	m_pMonster2->InitMonsterSprite("Robot3.png", "RobotAttack", "monsterDie", "RobotRun", "RobotAttack4.png", 1);
+	m_pMonster2->InitMonsterSprite("Robot3.png", "RobotAttack","Robothurt", "monsterDie", "RobotRun", "monsterDie5.png", 1);
 	m_pMonster2->setVisible(true);
 	m_pMonster2->setPosition(600, 365);
 	m_pMonster2->StartListen(m_pHero);
 	monsterTwoList.pushBack(m_pMonster2);
 
 	auto m_pMonster3 = Monster::create();
-	m_pMonster3->InitMonsterSprite("Robot3.png", "RobotAttack", "monsterDie", "RobotRun", "RobotAttack4.png", 1);
+	m_pMonster3->InitMonsterSprite("Robot3.png", "RobotAttack", "Robothurt","monsterDie", "RobotRun", "monsterDie5.png", 1);
 	m_pMonster3->setVisible(true);
 	m_pMonster3->setPosition(400, 200);
 	m_pMonster3->StartListen(m_pHero);
@@ -67,7 +67,7 @@ bool MonsterControl::initMonster(Hero* hero, Sprite* map) {
 	for (int i = 0; i < 3; i++)
 	{
 		auto m_pMonster = Monster::create();
-		m_pMonster->InitMonsterSprite("Robot3.png", "RobotAttack", "monsterDie", "RobotRun", "RobotAttack4.png", 1);
+		m_pMonster->InitMonsterSprite("Robot3.png", "RobotAttack", "Robothurt","monsterDie", "RobotRun", "monsterDie5.png", 1);
 		if (i == 0 || i == 1)
 		{
 			m_pMonster->setPosition(-100 * i, 250);

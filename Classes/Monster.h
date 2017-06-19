@@ -38,7 +38,7 @@ public:
 
 	//方法
 	//根据图片名创建怪物，暂时不带血条
-	void InitMonsterSprite(char* name, char* attack, char* die, char*walk, char*dieLast, int m_iLevel);
+	void InitMonsterSprite(char* name, char* attack,char* hurt, char* die, char*walk, char*dieLast, int m_iLevel);
 	//返回对象
 	Sprite* GetSprite();
 	//设置走动动画，num为图片数目，run_direction为精灵脸朝向，false朝右,name_each为name_png中每一小张图片的公共名称部分
@@ -52,7 +52,7 @@ public:
 	void AttackEnd();
 
 	//受伤动画
-	void HurtAnimation(const char *name_each, bool run_directon, float delay, int iLoops);
+	void HurtAnimation(const char *name_each, bool run_directon, float delay, int iLoops, int hurtType);
 	//受伤动画结束
 	void HurtEnd();
 
@@ -78,14 +78,18 @@ public:
 	void update(float delta);
 
 	CREATE_FUNC(Monster);
+	//得到怪物的名字
+	const char* getMonsterName();
 
 private:
 	Sprite* m_MonsterSprite; // 怪物精灵
 	char *Monster_name;      // 用来保存初始状态的精灵图片名称
 	char *Monster_attack;    // 怪物攻击帧
+	char *Monster_hurt;      // 受伤帧
 	char *Monster_die;       // 死亡帧
 	char *Monster_walk;      // 行走帧
 	char *Die_name;
+	int hurtType;			//怪物的受伤类型
 
 	Hero* my_hero;           // 当前英雄
 	float dis_x;			// 当前怪物和英雄的横轴距离

@@ -12,23 +12,21 @@
 
 #include <stdio.h>
 #include "cocos2d.h"
-#include "extensions\cocos-ext.h"
+#include "cocos-ext.h"
 #include "Hero.h"
-#include "ImageScene.hpp"
-#include "cocostudio/CocoStudio.h"
-
+#include "editor-support/cocostudio/CocoStudio.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 USING_NS_CC_EXT;
 
-#include "SimpleAudioEngine.h"
 using namespace CocosDenshion;
-
 using namespace cocos2d::extension;
 
 class Hero;
 class HpAndMp;
-class ImageScene:public Layer{
+class ImageScene:public Layer
+{
 public:
     static Scene* createScene();//´´½¨³¡¾°
     virtual bool init();
@@ -38,7 +36,9 @@ public:
 	//virtual void update(float Delta);
 
 	// ÔÝÍ£
-	void gamePause(Ref* pSender);
+	void gamePauseCallback(Ref* pSender);
+
+	void update(float Delta);
 
     CREATE_FUNC(ImageScene);
 private:

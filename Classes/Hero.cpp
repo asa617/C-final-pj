@@ -1,8 +1,10 @@
 ﻿// Created by loahao on 2017/6/10
+// Added by Xuan on 2017/6/18
 
 #include"Hero.h"
 #include"ActionTool.h"
 #include "OperateLayer.h"
+#include"AttackMonitor.h"
 
 USING_NS_CC;
 
@@ -26,6 +28,7 @@ void Hero::InitHeroSprite(char *hero_name, int ilevel)
 	//this->m_HeroSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(hero_name));
 	this->m_HeroSprite = Sprite::create(hero_name);
 	this->addChild(m_HeroSprite);
+	
 
 
 	initKey();
@@ -59,6 +62,7 @@ void Hero::Attack(int AttackType)
 	{
 		pAction = m_AttackNormal;
 		m_AttackRange = 150;
+		AttackMonitor::HeroAttackMonitor(this, abtAttack, m_AttackRange);
 	}
 	break;
 	case abtAttackA:
@@ -68,6 +72,8 @@ void Hero::Attack(int AttackType)
 		Action *jump = JumpTo::create(0.6, ccpSub(m_HeroSprite->getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)), 120, 1);
 		m_HeroSprite->runAction(jump);
 		m_AttackRange = 300;
+		AttackMonitor::HeroAttackMonitor(this, abtAttackA, m_AttackRange);
+
 	}
 	break;
 	case abtAttackB:
@@ -77,6 +83,7 @@ void Hero::Attack(int AttackType)
 		Action *move = MoveTo::create(0.3, ccpSub(m_HeroSprite->getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)));
 		m_HeroSprite->runAction(move);
 		m_AttackRange = 300;
+		AttackMonitor::HeroAttackMonitor(this, abtAttackB, m_AttackRange);
 	}
 	break;
 	}
@@ -152,7 +159,7 @@ void Hero::HurtByMonsterAnimation(const char *name_each, float delay, bool run_d
 		IsAttack = false;
 	}
 
-	Animate* action = ActionTool::animationWithFrameName(name_each, 1, delay);
+	Animate* action = ActionTool::animationWithFrameAndNum(name_each, 3, delay);
 	//创建回调动作，受伤动画结束调用HurtEnd()  
 	CallFunc* callFunc = CallFunc::create(this, callfunc_selector(Hero::HurtByMonsterEnd));
 	//创建连续动作  
@@ -185,8 +192,8 @@ void Hero::DeadAnimation(const char *name_each, float delay, bool run_directon)
 		m_HeroSprite->setFlippedX(run_directon);
 	}
 	// 创建动作  
-	Animate* Act = ActionTool::animationWithFrameName(name_each, 1, delay);
-	//创建回调动作，攻击结束后调用AttackEnd()  
+	Animate* Act = ActionTool::animationWithFrameAndNum(name_each, 5, 0.3f);
+	//创建回调动作，死亡结束后调用DeadEnd()  
 	CallFunc* callAttackEnd = CallFunc::create(this, callfunc_selector(Hero::DeadEnd));
 	//创建连续动作  
 	ActionInterval* AttackAct = Sequence::create(Act, callAttackEnd, NULL);
@@ -199,9 +206,13 @@ void Hero::DeadEnd()
 {
 	IsDead = true;
 	//恢复死亡的样子  
+	//记录死亡的位置
+	float x = m_HeroSprite->getPositionX();
+	float y = m_HeroSprite->getPositionY();
 	this->removeChild(m_HeroSprite, true);//把原来的精灵删除掉
-	m_HeroSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("HeroRun1.png"));//恢复死亡的样子
-	m_HeroSprite->setFlippedX(HeroPath);
+	m_HeroSprite = Sprite::create("dead5.png");//恢复死亡的样子
+	m_HeroSprite->setFlippedX(!HeroPath);
+	m_HeroSprite->setPosition(Vec2(x, y));
 	this->addChild(m_HeroSprite);
 
 }
