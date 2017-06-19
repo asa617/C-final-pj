@@ -11,9 +11,32 @@
 USING_NS_CC;
 using namespace CocosDenshion;
 
-#define WINSIZE Director::getInstance()->getWinSize()//窗口大小
+#define WINSIZE Director::getInstance()->getWinSize()
 
-#define MONSTERNUMBER 6//每一波怪物数量
+#define setIntToXML     UserDefault::getInstance()->setIntegerForKey
+#define setFloatToXML   UserDefault::getInstance()->setFloatForKey
+#define setBoolToXML    UserDefault::getInstance()->setBoolForKey
+#define getIntFromXML   UserDefault::getInstance()->getIntegerForKey
+#define getFloatFromXML UserDefault::getInstance()->getFloatForKey
+#define getBoolFromXML  UserDefault::getInstance()->getBoolForKey
 
+#define SOUND_KEY       "soundClose"
+#define MUSIC_KEY       "musicClose"
+#define GAMELEVEL_KEY   "gameLevel"
+#define SELECTGATE      "selectGate"
+#define GATEONE         "gateOne"
+#define GATETWO         "gateTwo"
+#define GATETHREE       "gateThree"
+#define GAMEOVER        "gameOver"
+
+
+#define MONSTERNUMBER 6
+
+#define aduioEngine   SimpleAudioEngine::getInstance()
+
+#define PLAYEFFECT if(getBoolFromXML(SOUND_KEY))\
+{\
+    aduioEngine->playEffect("button.wav");\
+}
 
 #endif // !_GlobalDefine_H

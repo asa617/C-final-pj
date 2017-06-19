@@ -1,8 +1,8 @@
 #include "HelloWorldScene.h"
-#include "SimpleAudioEngine.h"
 #include "ImageScene.hpp"
 #include "SettingScene.hpp"
 #include "LevelScene.hpp"
+#include "GlobalDefine.h"
 
 USING_NS_CC;
 
@@ -109,7 +109,10 @@ void HelloWorld::menuItemSettingCallback(Ref* pSender)
     auto sc = SettingScene::createScene();
     auto tsc = TransitionSlideInL::create(1.0f, sc);
     Director::getInstance()->pushScene(tsc);
-    SimpleAudioEngine::getInstance()->playEffect("button.wav");
+    
+    if(getBoolFromXML(SOUND_KEY)){
+        PLAYEFFECT;
+    }
 }
 
 //开始游戏回调函数
@@ -118,7 +121,10 @@ void HelloWorld::menuItemStartCallback(Ref* pSender)
     auto sc = ImageScene::createScene();
     auto tsc = TransitionTurnOffTiles::create(1.0f, sc);
     Director::getInstance()->pushScene(tsc);
-    SimpleAudioEngine::getInstance()->playEffect("button.wav");
+    
+    if(getBoolFromXML(SOUND_KEY)){
+        PLAYEFFECT;
+    }
 }
 
 //选关回调函数
@@ -127,7 +133,10 @@ void HelloWorld::menuItemLevelCallback(Ref* pSender)
     auto sc = LevelScene::createScene();
     auto tsc = TransitionSlideInL::create(1.0f, sc);
     Director::getInstance()->pushScene(tsc);
-    SimpleAudioEngine::getInstance()->playEffect("button.wav");
+    
+    if(getBoolFromXML(SOUND_KEY)){
+        PLAYEFFECT;
+    }
 }
 
 void HelloWorld::onEnter()
@@ -141,7 +150,9 @@ void HelloWorld::onEnterTransitionDidFinish()
     Layer::onEnterTransitionDidFinish();
     log("HelloWorld onEnterTransitionDidFinish");
     //播放
-    SimpleAudioEngine::getInstance()->playBackgroundMusic("background1.mp3",true);
+    if(getBoolFromXML(MUSIC_KEY)){
+        SimpleAudioEngine::getInstance()->playBackgroundMusic("background1.mp3",true);
+    }
 }
 
 void HelloWorld::onExit()

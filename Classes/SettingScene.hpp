@@ -10,12 +10,12 @@
 #define SettingScene_hpp
 
 #include "SimpleAudioEngine.h"
+#include "GlobalDefine.h"
 #include "cocos2d.h"
 USING_NS_CC;
 
 class SettingScene:public Layer
 {
-    bool isEffect;
 public:
     static Scene* createScene();
     
