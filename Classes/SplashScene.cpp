@@ -53,6 +53,7 @@ void SplashScene::loadingAudio()
     SimpleAudioEngine::getInstance()->preloadBackgroundMusic("background1.mp3");
     SimpleAudioEngine::getInstance()->preloadBackgroundMusic("background2.mp3");
     SimpleAudioEngine::getInstance()->preloadBackgroundMusic("gameBGM.wav");
+
     //初始化音效
     SimpleAudioEngine::getInstance()->preloadEffect("button.wav");
 }

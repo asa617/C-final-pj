@@ -1,8 +1,11 @@
 ﻿// Created by loahao on 2017/6/10
+// Added by Xuan on 2017/6/18
 
 #include"Hero.h"
 #include"ActionTool.h"
 #include "OperateLayer.h"
+#include"AttackMonitor.h"
+#include "PauseLayer.h"
 
 USING_NS_CC;
 
@@ -22,11 +25,8 @@ void Hero::InitHeroSprite(char *hero_name, int ilevel)
 	percentage = 100.0f;
 	m_Speed = 5;
 	Hero_Name = hero_name;
-
-	//this->m_HeroSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(hero_name));
 	this->m_HeroSprite = Sprite::create(hero_name);
 	this->addChild(m_HeroSprite);
-
 
 	initKey();
 	InitAction();
@@ -40,11 +40,11 @@ void Hero::InitAction()
 	m_AttackNormal = AttackNormal;
 	m_AttackNormal->retain();
 	//跳击
-	Animate* AttackJump = ActionTool::animationWithFrameAndNum("HeroAttackJ", 8, 0.1);
+	Animate* AttackJump = ActionTool::animationWithFrameAndNum("HeroAttackJ", 8, 0.2);
 	m_AttackJump = AttackJump;
 	m_AttackJump->retain();
 	//暴击
-	Animate* AttackTerror = ActionTool::animationWithFrameAndNum("HeroAttackT", 3, 0.1);
+	Animate* AttackTerror = ActionTool::animationWithFrameAndNum("HeroAttackT", 3, 0.3);
 	m_AttackTerror = AttackTerror;
 	m_AttackTerror->retain();
 
@@ -57,26 +57,33 @@ void Hero::Attack(int AttackType)
 	{
 	case abtAttack:
 	{
+		m_HeroSprite->stopAllActions();
 		pAction = m_AttackNormal;
 		m_AttackRange = 150;
+		AttackMonitor::HeroAttackMonitor(this, abtAttack, m_AttackRange);
 	}
 	break;
 	case abtAttackA:
 	{
+		m_HeroSprite->stopAllActions();
 		pAction = m_AttackJump;
 		// 当前位置跳跃
 		Action *jump = JumpTo::create(0.6, ccpSub(m_HeroSprite->getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)), 120, 1);
 		m_HeroSprite->runAction(jump);
 		m_AttackRange = 300;
+		AttackMonitor::HeroAttackMonitor(this, abtAttackA, m_AttackRange);
+
 	}
 	break;
 	case abtAttackB:
 	{
 		pAction = m_AttackTerror;
+		m_HeroSprite->stopAllActions();
 		// 当前位置移动
 		Action *move = MoveTo::create(0.3, ccpSub(m_HeroSprite->getPosition(), ccp(m_HeroSprite->isFlippedX() ? 200 : -200, 0)));
 		m_HeroSprite->runAction(move);
 		m_AttackRange = 300;
+		AttackMonitor::HeroAttackMonitor(this, abtAttackB, m_AttackRange);
 	}
 	break;
 	}
@@ -101,7 +108,6 @@ void Hero::SetAttackRange()
 void Hero::PostAttack()
 {
 	SetAttackRange();
-	//NotificationCenter::sharedNotificationCenter()->postNotification("attack", this);
 }
 
 Sprite * Hero::GetSprite()
@@ -123,7 +129,6 @@ void Hero::CheckLocation()
 		if (CurPoint.y > WinSize.height /2 -230)
 			NewPoint.y = WinSize.height /2 -230;
 		m_HeroSprite->setPosition(NewPoint);
-		//log("x=%d,y=%d", NewPoint.x,NewPoint.y);
 	
 }
 
@@ -145,14 +150,14 @@ void Hero::HurtByMonsterAnimation(const char *name_each, float delay, bool run_d
 		m_HeroSprite->stopAllActions();//当前精灵停止所有动画  
 									   //恢复精灵原来的初始化贴图   
 		this->removeChild(m_HeroSprite, true);//把原来的精灵删除掉  
-		m_HeroSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(Hero_Name));//恢复精灵原来的贴图样子  
+		m_HeroSprite = Sprite::create("Hero1.png");//恢复精灵原来的贴图样子  
 		m_HeroSprite ->setFlippedX(HeroPath);
 		this->addChild(m_HeroSprite);
 		IsRunning = false;
 		IsAttack = false;
 	}
 
-	Animate* action = ActionTool::animationWithFrameName(name_each, 1, delay);
+	Animate* action = ActionTool::animationWithFrameAndNum(name_each, 3, delay);
 	//创建回调动作，受伤动画结束调用HurtEnd()  
 	CallFunc* callFunc = CallFunc::create(this, callfunc_selector(Hero::HurtByMonsterEnd));
 	//创建连续动作  
@@ -185,8 +190,8 @@ void Hero::DeadAnimation(const char *name_each, float delay, bool run_directon)
 		m_HeroSprite->setFlippedX(run_directon);
 	}
 	// 创建动作  
-	Animate* Act = ActionTool::animationWithFrameName(name_each, 1, delay);
-	//创建回调动作，攻击结束后调用AttackEnd()  
+	Animate* Act = ActionTool::animationWithFrameAndNum(name_each, 5, 0.15f);
+	//创建回调动作，死亡结束后调用DeadEnd()  
 	CallFunc* callAttackEnd = CallFunc::create(this, callfunc_selector(Hero::DeadEnd));
 	//创建连续动作  
 	ActionInterval* AttackAct = Sequence::create(Act, callAttackEnd, NULL);
@@ -199,9 +204,13 @@ void Hero::DeadEnd()
 {
 	IsDead = true;
 	//恢复死亡的样子  
+	//记录死亡的位置
+	float x = m_HeroSprite->getPositionX();
+	float y = m_HeroSprite->getPositionY();
 	this->removeChild(m_HeroSprite, true);//把原来的精灵删除掉
-	m_HeroSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("HeroRun1.png"));//恢复死亡的样子
-	m_HeroSprite->setFlippedX(HeroPath);
+	m_HeroSprite = Sprite::create("dead5.png");//恢复死亡的样子
+	m_HeroSprite->setFlippedX(!HeroPath);
+	m_HeroSprite->setPosition(Vec2(x, y));
 	this->addChild(m_HeroSprite);
 
 }
@@ -222,7 +231,6 @@ void Hero::initKey()
 	auto KeyListener = EventListenerKeyboard::create();
 	KeyListener->onKeyPressed = [=](EventKeyboard::KeyCode key, Event* event)
 	{
-		log("keyint");
 		keys[key] = true;
 	};
 
@@ -235,11 +243,43 @@ void Hero::initKey()
 }
 
 
+void Hero::MoveAndRun(float Direction)
+{
+	int ChangeX = 0;
+	int ChangeY = 0;
+	bool RunPath = true;
+	ActionInterval *moveTo;
+	if (Direction > 315 || Direction <= 45)
+	{
+		ChangeX = 10;
+		RunPath = true;
+	}
+	else if (Direction > 45 && Direction <= 135)
+	{
+		ChangeY = -5;
+	}
+	else if (Direction > 135 && Direction <= 225)
+	{
+		ChangeX = -10;
+		RunPath = false;
+	}
+	else if (Direction > 225 && Direction < 315)
+		ChangeY = 5;
 
-/*bool Hero::isKeyPressed(EventKeyboard::KeyCode key)
-{		
-
-}*/
+	if (!RunPath)
+	{
+		m_HeroSprite->setFlippedX(true);
+	}
+	else
+	{
+		m_HeroSprite->setFlippedX(false);
+	}
+	moveTo = MoveTo::create(0.5, Vec2(m_HeroSprite->getPositionX() + ChangeX, m_HeroSprite->getPositionY() + ChangeY));
+	Animate* Run = ActionTool::animationWithFrameAndNum("HeroRun", 11, 0.1);
+	Action* m_action = Spawn::create(moveTo, Run, NULL);
+	m_HeroSprite->runAction(m_action);
+	CheckLocation();
+}
 
 void Hero::KeyPressDo(EventKeyboard::KeyCode key)
 {
@@ -265,7 +305,6 @@ void Hero::KeyPressDo(EventKeyboard::KeyCode key)
 		break;
 	case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 		ChangeY = -5;
-
 		RunningAction = true;
 		break;
 
@@ -302,7 +341,6 @@ void Hero::update(float delta)
 	
 	Node::update(delta);
 
-//	log("update");
 	auto LeftArrow = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
 	auto RightArrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
 	auto UpArrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
@@ -334,6 +372,5 @@ void Hero::update(float delta)
 		log("DownIsPressed");
 	}
 
-	
 }
 

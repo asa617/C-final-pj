@@ -12,21 +12,25 @@
 #include "OperateLayer.h"
 #include "GlobalDefine.h"
 #include "MonsterControl.h"
+#include "AttackMonitor.h"
+#include "PauseLayer.h"
 
 
 class Hero;
 
 
-Scene* ImageScene::createScene(){ //创建场景
+Scene* ImageScene::createScene()
+{ //创建场景
     auto scene = Scene::create();
     auto layer = ImageScene::create();
     scene->addChild(layer);
     return scene;
 }
 
-bool ImageScene::init(){   //场景初始化
+bool ImageScene::init()
+{   //场景初始化
 	if (!Layer::init())
-	return false;
+	    return false;
     //更改bgm
     if (getBoolFromXML(MUSIC_KEY))
     {
@@ -40,9 +44,11 @@ bool ImageScene::init(){   //场景初始化
     }
     else
         aduioEngine->pauseBackgroundMusic();
-    //地图载入
+	//地图载入
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	auto BgMap = Sprite::create("level_1_bg.png");
+
+	String* mapname = String::createWithFormat("level_%d_bg.png", iLevel);
+	BgMap = Sprite::create(mapname->getCString());
     BgMap->setPosition(getContentSize().width / 2,getContentSize().height / 2);
     auto size = BgMap->getContentSize();
 	float scaleX = (float)visibleSize.width/(float)size.width;
@@ -56,6 +62,7 @@ bool ImageScene::init(){   //场景初始化
 	m_pHero->setPosition(100, 250);
 	this->addChild(m_pHero);
 
+
 	MonsterControl *monster = MonsterControl::createWithHeroAndMap(m_pHero,BgMap);
 
 	//添加按钮
@@ -65,14 +72,14 @@ bool ImageScene::init(){   //场景初始化
 
 	//暂停按钮
 	auto pauseGameItem = MenuItemImage::create(
-		                                       "pause.png",
-		                                       "pause.png",
-		                                       CC_CALLBACK_1(ImageScene::gamePauseCallback, this));
-    pauseGameItem->setScale(0.15);
-	pauseGameItem->setPosition(visibleSize.width-50,visibleSize.height-45);
-    auto menu = Menu::create(pauseGameItem,nullptr);
-    menu->setPosition(Vec2::ZERO);
-    this->addChild(menu,3);
+		"PauseBg.png",
+		"PauseBg.png",
+		CC_CALLBACK_1(ImageScene::gamePauseCallback, this));
+	pauseGameItem->setScale(0.15);
+	pauseGameItem->setPosition(visibleSize.width - 50, visibleSize.height - 45);
+	auto menu = Menu::create(pauseGameItem, nullptr);
+	menu->setPosition(Vec2::ZERO);
+	this->addChild(menu, 3);
 
 	//添加血条、能量条
 	HpAndMpBg = Sprite::create("hpmpbg.png");
@@ -93,7 +100,11 @@ bool ImageScene::init(){   //场景初始化
 	MpBar->setPosition(78,visibleSize.height - 70);
 	this->addChild(MpBar,2);
 	this->addChild(HpAndMpBg, 1);
+	auto HeroIcon = Sprite::create("HeroState1.png");
+	HeroIcon->setPosition(50, visibleSize.height - 50);
+	this->addChild(HeroIcon,4);
 
+	monsterFlag = false;//第一波怪物未死亡
 
 	this->scheduleUpdate();
 	return true;
@@ -105,6 +116,86 @@ void ImageScene::attackButtonClick(int nAttackType)
 	m_pHero->Attack(nAttackType);
 }
 
-void ImageScene::gamePauseCallback(Ref* pSender) {
-    Director::getInstance()->pause();
+
+void ImageScene::update(float Delta)
+{
+	if (AttackMonitor::MonsterAttackMonitor(m_pHero))
+	{
+		HpBar->setPercentage(m_pHero->percentage);
+		MpBar->setPercentage(m_pHero->m_CurrentMp / m_pHero->m_TotalMp * 100.0f);
+	}
+	MpBar->setPercentage(m_pHero->m_CurrentMp / m_pHero->m_TotalMp * 100.0f);
+	updateMonster(Delta);
+
+	//死亡场景跳转
+	if(m_pHero->IsDead)
+	{
+		scheduleOnce(schedule_selector(PauseLayer::GameOver), 1.0f);
+		unscheduleUpdate();
+	}
+}
+
+void ImageScene::actionJoypadStart(float degrees)
+{
+	m_pHero->MoveAndRun(degrees);
+}
+
+void ImageScene::actionJoypadUpdate(float degrees)
+{
+	m_pHero->MoveAndRun(degrees);
+}
+
+void ImageScene::actionJoypadEnded(float degrees)
+{
+	m_pHero->stopAllActions();
+}
+
+void ImageScene::gamePauseCallback(Ref* pSender)
+{
+	auto _Schedule = this->getScheduler();
+	auto ReplaceScene = [&](float pic)
+	{
+		Director::getInstance()->pushScene(PauseLayer::createScene("PausePic.png"));
+	};
+	_Schedule->schedule(ReplaceScene, this, 0, 0, 0, false, "screeshot");
+}
+
+
+bool ImageScene::areMonstersAllDie(Vector<Monster*> Monsterlist)
+{
+	bool noMonster = true;
+	for (auto monster : Monsterlist)
+	{
+		if (monster->IsDead == false)
+		{
+			noMonster = false;
+		}
+	}
+	return noMonster;
+}
+
+void ImageScene::updateMonster(float delta)
+{
+	bool win;
+	//胜利场景跳转
+	win = (areMonstersAllDie(monsterOneList) && areMonstersAllDie(monsterTwoList));
+	if (win)
+	{
+		scheduleOnce(schedule_selector(PauseLayer::GameWin), 1.0f);
+		unscheduleUpdate();
+	}
+	
+	if (areMonstersAllDie(monsterOneList))
+	{
+		if (monsterFlag == true)
+			return;
+		monsterShowList = monsterTwoList;
+		for (auto monster : monsterShowList) {
+			BgMap->addChild(monster);
+			monster->StartListen(m_pHero);
+		}
+		monsterFlag = true;
+
+	}
+
 }

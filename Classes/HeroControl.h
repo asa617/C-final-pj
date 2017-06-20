@@ -7,7 +7,8 @@
 
 USING_NS_CC;
 
-class OperateLayer;		
+class OperateLayer;
+class ImageScene;
 					
 class CActionButton : public Node, public DirectorDelegate //¹¥»÷°´Å¥
 {
@@ -91,4 +92,44 @@ private:
 	bool m_bCanClick;
 };
 
-#endif  // _ACTION_BUTTON_H_
+class Joypad : public Layer
+{
+public:
+	~Joypad();
+
+	virtual bool init();
+	CREATE_FUNC(Joypad);
+
+	void KeyStart(float degrees);
+	void KeyUpdate(float degrees);
+	void KeyEnded(float degrees);
+
+
+	void setGameLayer(ImageScene* pImageScene) { m_pImageScene = pImageScene; }
+private:
+	Joypad();
+
+	virtual void onEnter();
+	virtual void onExit();
+
+	bool onTouchBegan(Touch* touch, Event* event);
+	void onTouchMoved(Touch* touch, Event* event);
+	void onTouchEnded(Touch* touch, Event* event);
+
+	inline void UpdateRotation();
+	inline void UpdateTouchRotation(Touch* touch, Event* event);
+
+	Size m_szWinSize;
+	Point m_ptCenter;
+	Sprite *m_pControlSprite;
+	Point m_ptDefaultPoint;
+	float m_fDefaultRotation;
+	float		m_fRotation;
+
+	ImageScene *m_pImageScene;
+	bool m_bKeydown;
+
+	void initTouch();
+};
+
+#endif  

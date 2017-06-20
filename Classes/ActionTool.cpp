@@ -36,7 +36,6 @@ Animate* ActionTool::animationWithFrameAndNum(const char *frameName,int framecou
 	for (int index = 1; index <= framecount; index++)
 	{
 		String* name = String::createWithFormat("%s%d.png", frameName, index++);
-		//frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name->getCString());
 		animation->addSpriteFrameWithFile(name->getCString());
 	}
 	animation->setDelayPerUnit(delay);

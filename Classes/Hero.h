@@ -14,7 +14,6 @@ public:
 	// 返回当前英雄  
 	Sprite* GetSprite();
 	Sprite* m_HeroSprite; //英雄
-
 	// 设置动画，run_directon为精灵脸朝向，false朝右,frameName为图片帧名字  
 	void SetAnimation(const char *frameName,float delay, bool run_directon);
 	// 停止动画  
@@ -60,6 +59,8 @@ public:
 	//方向移动
 	void initKey();
 	void KeyPressDo(EventKeyboard::KeyCode key);
+
+	void MoveAndRun(float Direction);
 
 	virtual void update(float Delta);
 	CREATE_FUNC(Hero);

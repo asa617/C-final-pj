@@ -6,177 +6,179 @@
 //
 //
 
-#include "SelectLevel.hpp"
+#include "SelectLevel.h"
+#include "cocos2d.h"
 #include <math.h>
 #define PI acos(-1)
-//èœå•çš„ç¼©å°æ¯”ä¾‹ æœ€å°ä¸º1-MENU_SCALE
+//²Ëµ¥µÄËõĞ¡±ÈÀı ×îĞ¡Îª1-MENU_SCALE
 #define MENU_SCALE 0.3
-//èœå•çš„å€¾æ–œåº¦
+//²Ëµ¥µÄÇãĞ±¶È
 #define MENU_ASLOPE 60.0
-//calcFunction(x)ä¸ºx/(x+a),å…¶ä¸­aä¸ºå¸¸æ•°
+//calcFunction(x)Îªx/(x+a),ÆäÖĞaÎª³£Êı
 #define CALC_A 1
-//åŠ¨ç”»è¿è¡Œæ—¶é—´
+//¶¯»­ÔËĞĞÊ±¼ä
 #define ANIMATION_DURATION  0.3f
-//èœå•é¡¹å¤§å°ä¸å±å¹•çš„æ¯”ä¾‹ï¼Œå¯é€šè¿‡setContentSizeè®¾ç½®
+//²Ëµ¥Ïî´óĞ¡ÓëÆÁÄ»µÄ±ÈÀı£¬¿ÉÍ¨¹ısetContentSizeÉèÖÃ
 #define CONTENT_SIZE_SCALE (2.0/3)
-//èœå•é¡¹é•¿åº¦ä¸èœå•é•¿åº¦çš„æ¯”ä¾‹ï¼Œæ»‘åŠ¨ä¸€ä¸ªèœå•é¡¹é•¿åº¦ï¼Œèœå•é¡¹å˜åŒ–ä¸€ä¸ª
+//²Ëµ¥Ïî³¤¶ÈÓë²Ëµ¥³¤¶ÈµÄ±ÈÀı£¬»¬¶¯Ò»¸ö²Ëµ¥Ïî³¤¶È£¬²Ëµ¥Ïî±ä»¯Ò»¸ö
 #define ITEM_SIZE_SCALE (1.0/4)
 
 USING_NS_CC;
 
 bool SelectLevel::init()
 {
-    if (!Layer::init())
-    {
-        return false;
-    }
-    _index = 0;
-    _lastIndex = 0;
-    this->ignoreAnchorPointForPosition(false);
-    _selectedItem = nullptr;
-    auto size = Director::getInstance()->getWinSize();
-    this->setContentSize(size*CONTENT_SIZE_SCALE);
-    this->setAnchorPoint(Point(0.5f, 0.5f));
-    auto listener = EventListenerTouchOneByOne::create();
-    listener->onTouchBegan = CC_CALLBACK_2(SelectLevel::onTouchBegan, this);
-    listener->onTouchMoved = CC_CALLBACK_2(SelectLevel::onTouchMoved, this);
-    listener->onTouchEnded = CC_CALLBACK_2(SelectLevel::onTouchEnded, this);
-    getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    return true;
+	if (!Layer::init())
+	{
+		return false;
+	}
+	float _index = 0;
+	_index = 0;
+	_lastIndex = 0;
+	this->ignoreAnchorPointForPosition(false);
+	_selectedItem = nullptr;
+	auto size = Director::getInstance()->getWinSize();
+	this->setContentSize(size*CONTENT_SIZE_SCALE);
+	this->setAnchorPoint(Point(0.5f, 0.5f));
+	auto listener = EventListenerTouchOneByOne::create();
+	listener->onTouchBegan = CC_CALLBACK_2(SelectLevel::onTouchBegan, this);
+	listener->onTouchMoved = CC_CALLBACK_2(SelectLevel::onTouchMoved, this);
+	listener->onTouchEnded = CC_CALLBACK_2(SelectLevel::onTouchEnded, this);
+	getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+	return true;
 };
 
 void SelectLevel::addMenuItem(cocos2d::MenuItem *item)
 {
-    item->setPosition(this->getContentSize().width / 2, this->getContentSize().height / 2);
-    this->addChild(item);
-    _items.pushBack(item);
-    reset();
-    updatePositionWithAnimation();
-    return;
+	item->setPosition(this->getContentSize().width / 2, this->getContentSize().height / 2);
+	this->addChild(item);
+	_items.pushBack(item);
+	reset();
+	updatePositionWithAnimation();
+	return;
 }
 
 void SelectLevel::updatePosition()
 {
-    auto menuSize = getContentSize();
-    for (int i = 0; i < _items.size(); i++){
-        //è®¾ç½®ä½ç½®
-        float x = calcFunction(i - _index, menuSize.width / 2);
-        _items.at(i)->setPosition(Point(menuSize.width / 2 + x, menuSize.height / 2));
-        //è®¾ç½®zOrder
-        _items.at(i)->setZOrder(-abs((i - _index) * 100));
-        //è®¾ç½®ä¼¸ç¼©æ¯”ä¾‹
-        _items.at(i)->setScale(1.0 - abs(calcFunction(i - _index, MENU_SCALE)));
-        //è®¾ç½®å€¾æ–œï¼ŒNodeæ²¡æœ‰setCameraå‡½æ•°ï¼Œå°†OrbitCameraçš„è¿è¡Œæ—¶é—´è®¾ä¸º0æ¥è¾¾åˆ°æ•ˆæœ
-        auto orbit1 = OrbitCamera::create(0, 1, 0, calcFunction(i - _lastIndex, MENU_ASLOPE), calcFunction(i - _lastIndex, MENU_ASLOPE) - calcFunction(i - _index, MENU_ASLOPE), 0, 0);
-        _items.at(i)->runAction(orbit1);
-    }
-    return;
+	auto menuSize = getContentSize();
+	for (int i = 0; i < _items.size(); i++) {
+		//ÉèÖÃÎ»ÖÃ
+		float x = calcFunction(i - _index, menuSize.width / 2);
+		_items.at(i)->setPosition(Point(menuSize.width / 2 + x, menuSize.height / 2));
+		//ÉèÖÃzOrder
+		_items.at(i)->setZOrder(-abs((i - _index) * 100));
+		//ÉèÖÃÉìËõ±ÈÀı
+		_items.at(i)->setScale(1.0 - abs(calcFunction(i - _index, MENU_SCALE)));
+		//ÉèÖÃÇãĞ±£¬NodeÃ»ÓĞsetCameraº¯Êı£¬½«OrbitCameraµÄÔËĞĞÊ±¼äÉèÎª0À´´ïµ½Ğ§¹û
+		auto orbit1 = OrbitCamera::create(0, 1, 0, calcFunction(i - _lastIndex, MENU_ASLOPE), calcFunction(i - _lastIndex, MENU_ASLOPE) - calcFunction(i - _index, MENU_ASLOPE), 0, 0);
+		_items.at(i)->runAction(orbit1);
+	}
+	return;
 }
 
 void SelectLevel::updatePositionWithAnimation()
 {
-    //å…ˆåœæ­¢æ‰€æœ‰å¯èƒ½å­˜åœ¨çš„åŠ¨ä½œ
-    for (int i = 0; i < _items.size(); i++)
-        _items.at(i)->stopAllActions();
-    auto menuSize = getContentSize();
-    for (int i = 0; i < _items.size(); i++){
-        _items.at(i)->setZOrder(-abs((i - _index) * 100));
-        float x = calcFunction(i - _index, menuSize.width / 2);
-        auto moveTo = MoveTo::create(ANIMATION_DURATION, Point(menuSize.width / 2 + x, menuSize.height / 2));
-        _items.at(i)->runAction(moveTo);
-        auto scaleTo = ScaleTo::create(ANIMATION_DURATION, (1 - abs(calcFunction(i - _index, MENU_SCALE))));
-        _items.at(i)->runAction(scaleTo);
-        auto orbit1 = OrbitCamera::create(ANIMATION_DURATION, 1, 0, calcFunction(i - _lastIndex, MENU_ASLOPE), calcFunction(i - _index, MENU_ASLOPE) - calcFunction(i - _lastIndex, MENU_ASLOPE), 0, 0);
-        _items.at(i)->runAction(orbit1);
-    }
-    scheduleOnce(schedule_selector(SelectLevel::actionEndCallBack), ANIMATION_DURATION);
-    return;
+	//ÏÈÍ£Ö¹ËùÓĞ¿ÉÄÜ´æÔÚµÄ¶¯×÷
+	for (int i = 0; i < _items.size(); i++)
+		_items.at(i)->stopAllActions();
+	auto menuSize = getContentSize();
+	for (int i = 0; i < _items.size(); i++) {
+		_items.at(i)->setZOrder(-abs((i - _index) * 100));
+		float x = calcFunction(i - _index, menuSize.width / 2);
+		auto moveTo = MoveTo::create(ANIMATION_DURATION, Point(menuSize.width / 2 + x, menuSize.height / 2));
+		_items.at(i)->runAction(moveTo);
+		auto scaleTo = ScaleTo::create(ANIMATION_DURATION, (1 - abs(calcFunction(i - _index, MENU_SCALE))));
+		_items.at(i)->runAction(scaleTo);
+		auto orbit1 = OrbitCamera::create(ANIMATION_DURATION, 1, 0, calcFunction(i - _lastIndex, MENU_ASLOPE), calcFunction(i - _index, MENU_ASLOPE) - calcFunction(i - _lastIndex, MENU_ASLOPE), 0, 0);
+		_items.at(i)->runAction(orbit1);
+	}
+	scheduleOnce(schedule_selector(SelectLevel::actionEndCallBack), ANIMATION_DURATION);
+	return;
 }
 
 void SelectLevel::reset()
 {
-    _lastIndex = 0;
-    _index = 0;
+	_lastIndex = 0;
+	_index = 0;
 }
 
 void SelectLevel::setIndex(int index)
 {
-    _lastIndex = _index;
-    this->_index = index;
+	_lastIndex = _index;
+	this->_index = index;
 }
 
 float SelectLevel::getIndex()
 {
-    return _index;
+	return _index;
 }
 
 MenuItem* SelectLevel::getCurrentItem()
 {
-    if (_items.size() == 0)
-        return nullptr;
-    return _items.at(_index);
+	if (_items.size() == 0)
+		return nullptr;
+	return _items.at(_index);
 }
 
 bool SelectLevel::onTouchBegan(Touch* touch, Event* event)
 {
-    //å…ˆåœæ­¢æ‰€æœ‰å¯èƒ½å­˜åœ¨çš„åŠ¨ä½œ
-    for (int i = 0; i < _items.size(); i++)
-        _items.at(i)->stopAllActions();
-    if (_selectedItem)
-        _selectedItem->unselected();
-    auto position = this->convertToNodeSpace(touch->getLocation());
-    auto size = this->getContentSize();
-    auto rect = Rect(0, 0, size.width, size.height);
-    if (rect.containsPoint(position)){
-        return true;
-    }
-    return false;
+	//ÏÈÍ£Ö¹ËùÓĞ¿ÉÄÜ´æÔÚµÄ¶¯×÷
+	for (int i = 0; i < _items.size(); i++)
+		_items.at(i)->stopAllActions();
+	if (_selectedItem)
+		_selectedItem->unselected();
+	auto position = this->convertToNodeSpace(touch->getLocation());
+	auto size = this->getContentSize();
+	auto rect = Rect(0, 0, size.width, size.height);
+	if (rect.containsPoint(position)) {
+		return true;
+	}
+	return false;
 }
 
 void SelectLevel::onTouchEnded(Touch* touch, Event* event)
 {
-    auto size = getContentSize();
-    auto xDelta = touch->getLocation().x - touch->getStartLocation().x;
-    rectify(xDelta>0);
-    if (abs(xDelta)<size.width / 24 && _selectedItem)
-        _selectedItem->activate();
-    updatePositionWithAnimation();
-    return;
+	auto size = getContentSize();
+	auto xDelta = touch->getLocation().x - touch->getStartLocation().x;
+	rectify(xDelta>0);
+	if (abs(xDelta)<size.width / 24 && _selectedItem)
+		_selectedItem->activate();
+	updatePositionWithAnimation();
+	return;
 }
 
 void SelectLevel::onTouchMoved(Touch* touch, Event* event)
 {
-    auto xDelta = touch->getDelta().x;
-    auto size = getContentSize();
-    _lastIndex = _index;
-    _index -= xDelta / (size.width *ITEM_SIZE_SCALE);
-    updatePosition();
-    return;
+	auto xDelta = touch->getDelta().x;
+	auto size = getContentSize();
+	_lastIndex = _index;
+	_index -= xDelta / (size.width *ITEM_SIZE_SCALE);
+	updatePosition();
+	return;
 }
 
 void SelectLevel::rectify(bool forward)
 {
-    auto index = getIndex();
-    if (index < 0)
-        index = 0;
-    if (index>_items.size() - 1)
-        index = _items.size() - 1;
-    if (forward){
-        index = (int)(index + 0.4);
-    }
-    else
-        index = (int)(index + 0.6);
-    setIndex((int)index);
+	auto index = getIndex();
+	if (index < 0)
+		index = 0;
+	if (index>_items.size() - 1)
+		index = _items.size() - 1;
+	if (forward) {
+		index = (int)(index + 0.4);
+	}
+	else
+		index = (int)(index + 0.6);
+	setIndex((int)index);
 }
 
 void SelectLevel::actionEndCallBack(float dx)
 {
-    _selectedItem = getCurrentItem();
-    if (_selectedItem)
-        _selectedItem->selected();
+	_selectedItem = getCurrentItem();
+	if (_selectedItem)
+		_selectedItem->selected();
 }
 
 float SelectLevel::calcFunction(float index, float width)
 {
-    return width*index / (abs(index) + CALC_A);
+	return width*index / (abs(index) + CALC_A);
 }

@@ -34,7 +34,7 @@ bool CActionButton::init(const char *szImage)//按钮初始化
 
 void CActionButton::updateProjection(void)
 {
-//	Log("");
+
 }
 
 void CActionButton::click()
@@ -86,12 +86,10 @@ bool CActionButton::ccTouchBegan(Touch* touch, Event* event)
 
 void CActionButton::ccTouchMoved(Touch* touch, Event* event)
 {
-//	Log("TouchMoved");
 }
 
 void CActionButton::ccTouchEnded(Touch* touch, Event* event)
 {
-//	Log("TouchEnded");
 	endedAnimation();
 }
 
@@ -241,6 +239,148 @@ void CActionButton::initTouch()
 	touchListener->onTouchBegan = CC_CALLBACK_2(CActionButton::ccTouchBegan, this);
 	touchListener->onTouchMoved = CC_CALLBACK_2(CActionButton::ccTouchMoved, this);
 	touchListener->onTouchEnded = CC_CALLBACK_2(CActionButton::ccTouchEnded, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
+}
+Joypad::Joypad()
+{
+	m_szWinSize = Director::sharedDirector()->getWinSize();
+	m_ptCenter = ccp(m_szWinSize.width / 2, m_szWinSize.height / 2);
+	m_pControlSprite = NULL;
+	m_fDefaultRotation = m_fRotation = 0.0f;
+
+	m_pImageScene = NULL;
+	m_bKeydown = false;
+}
+
+Joypad::~Joypad()
+{
+
+}
+
+bool Joypad::init()
+{
+	bool Ret = false;
+	//CC_BREAK_IF(!Layer::init());
+	if (!Layer::init())
+		return false;
+	// 控制杆所在位置
+	m_ptDefaultPoint = ccp(110, 110);
+	// 默认旋转角度，以使开口正对右侧
+	m_fDefaultRotation = 26;
+	// 实际旋转角度
+	m_fRotation = 0;
+
+	setPosition(m_ptDefaultPoint);
+
+	// 添加显示精灵
+	addChild(Sprite::create("Joypad1.png"));
+	addChild(Sprite::create("Joypad2.png"));
+	m_pControlSprite = Sprite::create("Joypad3.png");
+	addChild(m_pControlSprite);
+	addChild(Sprite::create("Joypad4.png"));
+
+	UpdateRotation();
+
+	// 事件处理
+	initTouch();
+
+	Ret = true;
+
+	return Ret;
+}
+
+void Joypad::KeyStart(float degrees)
+{
+	if (m_pImageScene)
+		m_pImageScene->actionJoypadStart(m_fRotation);
+}
+
+void Joypad::KeyUpdate(float degrees)
+{
+	m_fRotation = degrees;
+	UpdateRotation();
+	if (m_pImageScene)
+		m_pImageScene->actionJoypadUpdate(m_fRotation);
+}
+
+void Joypad::KeyEnded(float degrees)
+{
+	if (m_pImageScene)
+		m_pImageScene->actionJoypadEnded(m_fRotation);
+}
+
+void Joypad::onEnter()
+{
+	Layer::onEnter();
+}
+
+void Joypad::onExit()
+{
+	Layer::onExit();
+}
+
+bool Joypad::onTouchBegan(Touch* touch, Event* event)
+{
+
+	Point location = touch->getLocation();
+
+	// 点击点的范围判断
+	Point curPoint = touch->getLocation();
+	if (curPoint.x > m_szWinSize.width / 2 || curPoint.y > m_szWinSize.height / 2)
+		return false;
+
+	UpdateTouchRotation(touch, event);
+	UpdateRotation();
+
+	if (m_pImageScene)
+		m_pImageScene->actionJoypadStart(m_fRotation);
+	return true;
+}
+
+void Joypad::onTouchMoved(Touch* touch, Event* event)
+{
+	Point location = touch->getLocation();
+
+	UpdateTouchRotation(touch, event);
+	UpdateRotation();
+
+	if (m_pImageScene)
+		m_pImageScene->actionJoypadUpdate(m_fRotation);
+}
+
+void Joypad::onTouchEnded(Touch* touch, Event* event)
+{
+	Point location = touch->getLocation();
+
+	UpdateTouchRotation(touch, event);
+	UpdateRotation();
+
+	if (m_pImageScene)
+		m_pImageScene->actionJoypadEnded(m_fRotation);
+}
+
+void Joypad::UpdateRotation()
+{
+	m_pControlSprite->setRotation(m_fDefaultRotation + m_fRotation);
+}
+
+void Joypad::UpdateTouchRotation(Touch* touch, Event* event)
+{
+	Point curPoint = touch->getLocation();
+	Point sp = ccpSub(curPoint, m_ptDefaultPoint);
+	float angle = ccpToAngle(sp);
+	angle *= -57.29577951;			// ...
+	angle = (angle < 0) ? 360 + angle : angle;
+	m_fRotation = angle;
+}
+
+void Joypad::initTouch()
+{
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->setSwallowTouches(true);
+	touchListener->onTouchBegan = CC_CALLBACK_2(Joypad::onTouchBegan, this);
+	touchListener->onTouchMoved = CC_CALLBACK_2(Joypad::onTouchMoved, this);
+	touchListener->onTouchEnded = CC_CALLBACK_2(Joypad::onTouchEnded, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 }
 

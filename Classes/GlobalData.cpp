@@ -6,6 +6,8 @@ bool m_bFlag1;
 bool m_bFlag2;
 bool m_bFlag3;
 
+int iLevel = 1;
+
 Vector<Monster*> monsterOneList;
 Vector<Monster*> monsterTwoList;
 Vector<Monster*> monsterThreeList;
