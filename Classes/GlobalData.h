@@ -17,6 +17,7 @@ extern Vector<Monster*> monsterTwoList;
 extern Vector<Monster*> monsterThreeList;
 extern Vector<Monster*> monsterShowList;
 extern int m_iSelectGate;
+//可以选择的关卡
 extern bool m_bFlag1;
 extern bool m_bFlag2;
 extern bool m_bFlag3;

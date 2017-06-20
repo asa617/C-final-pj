@@ -26,14 +26,15 @@ public:
 	MonsterControl();
 	~MonsterControl();
 	void updateMonster(float delta);
-	void showSecMon(float delta);
-	void showThrMon(float delta);
+	bool areMonstersAllDie(Vector<Monster*> Monsterlist);
 	static MonsterControl* createWithHeroAndMap(Hero* hero, Sprite* map);
 	bool initMonster(Hero* hero, Sprite* map);
 private:
 	Sprite* m_map;
 	Hero* m_pHero;
 	bool IsMonsterClear;
+	bool clearFlag;
+
 
 };
 

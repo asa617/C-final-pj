@@ -126,10 +126,11 @@ void Monster::HurtAnimation(const char *name_each, bool run_directon, float dela
 										  // 恢复精灵原来的初始化贴图 
 		this->removeChild(m_MonsterSprite, true);// 把原来的精灵删除掉
 		//m_MonsterSprite = Sprite::createWithSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(Monster_name));//恢复精灵原来的贴图样子
-		m_MonsterSprite->Sprite::create(Monster_name);
+		m_MonsterSprite = Sprite::create(Monster_name);
 		m_MonsterSprite->setFlipX(MonsterDirection);
 		IsRunning = false;
 		IsAttack = false;
+		this->addChild(m_MonsterSprite);
 	}
 	
 	

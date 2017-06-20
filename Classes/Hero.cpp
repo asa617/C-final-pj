@@ -252,6 +252,44 @@ void Hero::initKey()
 
 }*/
 
+void Hero::MoveAndRun(float Direction)
+{
+	int ChangeX = 0;
+	int ChangeY = 0;
+	bool RunPath = true;
+	ActionInterval *moveTo;
+	if (Direction > 315 || Direction <= 45)
+	{
+		ChangeX = 10;
+		RunPath = true;
+	}
+	else if (Direction > 45 && Direction <= 135)
+	{
+		ChangeY = -5;
+	}
+	else if (Direction > 135 && Direction <= 225)
+	{
+		ChangeX = -10;
+		RunPath = false;
+	}
+	else if (Direction > 225 && Direction < 315)
+		ChangeY = 5;
+
+	if (!RunPath)
+	{
+		m_HeroSprite->setFlippedX(true);
+	}
+	else
+	{
+		m_HeroSprite->setFlippedX(false);
+	}
+	moveTo = MoveTo::create(0.5, Vec2(m_HeroSprite->getPositionX() + ChangeX, m_HeroSprite->getPositionY() + ChangeY));
+	Animate* Run = ActionTool::animationWithFrameAndNum("HeroRun", 11, 0.1);
+	Action* m_action = Spawn::create(moveTo, Run, NULL);
+	m_HeroSprite->runAction(m_action);
+	CheckLocation();
+}
+
 void Hero::KeyPressDo(EventKeyboard::KeyCode key)
 {
 	log("Keyboard");

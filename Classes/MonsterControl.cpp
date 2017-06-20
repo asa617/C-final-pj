@@ -41,108 +41,90 @@ bool MonsterControl::initMonster(Hero* hero, Sprite* map) {
 	monsterThreeList.clear();
 	monsterShowList.clear();
 
-	auto m_pMonster1 = Monster::create();
-	m_pMonster1->InitMonsterSprite("Robot3.png", "RobotAttack","Robothurt", "monsterDie", "RobotRun", "monsterDie5.png", 1);
-	m_pMonster1->setVisible(true);
-	m_pMonster1->setPosition(500, 300);
-	m_map->addChild(m_pMonster1);
-	m_pMonster1->StartListen(m_pHero);
-	monsterShowList.pushBack(m_pMonster1);
-	m_bFlag1 = false;
-	//第二波
-	auto m_pMonster2 = Monster::create();
-	m_pMonster2->InitMonsterSprite("Robot3.png", "RobotAttack","Robothurt", "monsterDie", "RobotRun", "monsterDie5.png", 1);
-	m_pMonster2->setVisible(true);
-	m_pMonster2->setPosition(600, 365);
-	m_pMonster2->StartListen(m_pHero);
-	monsterTwoList.pushBack(m_pMonster2);
+	int count;//怪物计数
+	if (iLevel == 1)
+		count = 3;
 
-	auto m_pMonster3 = Monster::create();
-	m_pMonster3->InitMonsterSprite("Robot3.png", "RobotAttack", "Robothurt","monsterDie", "RobotRun", "monsterDie5.png", 1);
-	m_pMonster3->setVisible(true);
-	m_pMonster3->setPosition(400, 200);
-	m_pMonster3->StartListen(m_pHero);
-	monsterThreeList.pushBack(m_pMonster3);
-	// 第三波
-	for (int i = 0; i < 3; i++)
-	{
-		auto m_pMonster = Monster::create();
-		m_pMonster->InitMonsterSprite("Robot3.png", "RobotAttack", "Robothurt","monsterDie", "RobotRun", "monsterDie5.png", 1);
-		if (i == 0 || i == 1)
-		{
-			m_pMonster->setPosition(-100 * i, 250);
-		}
-		else
-		{
-			m_pMonster->setPosition(900, 365);
-		}
-		m_pMonster->setVisible(false);
-		monsterThreeList.pushBack(m_pMonster);
-	}
+	if (iLevel == 2)
+		count = 6;
 
-	this->schedule(schedule_selector(MonsterControl::updateMonster));
+	if (iLevel == 3)
+		count = 9;
+		for (int i = 0; i < count ; i++)
+		{
+			auto m_pMonster1 = Monster::create();
+			m_pMonster1->InitMonsterSprite("Robot3.png", "RobotAttack", "Robothurt", "monsterDie", "RobotRun", "monsterDie5.png", 1);
+			m_pMonster1->setVisible(true);
+			m_pMonster1->setPosition(500-30*i, 300 - 40 * i);
+			monsterOneList.pushBack(m_pMonster1);
+		}
+		//第二波
+		for (int i = 0; i < (count+2); i++)
+		{
+			
+			auto m_pMonster2 = Monster::create();
+			m_pMonster2->InitMonsterSprite("Robot3.png", "RobotAttack", "Robothurt", "monsterDie", "RobotRun", "monsterDie5.png", 1);
+			m_pMonster2->setVisible(true);
+			m_pMonster2->setPosition(600-20*i, 300-40*i);
+			monsterTwoList.pushBack(m_pMonster2);
+
+			auto Boss = Monster::create();
+			Boss->InitMonsterSprite("Boss.png", "BossAttack", "BossHurt", "BossDie", "Bossrun", "BossDie5.png",10);
+			Boss->setVisible(true);
+			Boss->setPosition(Vec2(500,200));
+			Boss->setAnchorPoint(Point(0,0));
+			monsterTwoList.pushBack(Boss);
+			
+			m_bFlag2 = true;
+		}
+
+		monsterShowList = monsterOneList;
+		for (auto monster : monsterShowList) {
+			m_map->addChild(monster);
+			monster->StartListen(m_pHero);
+		}
+	
+	
+
+
+
 
 	return true;
 
 }
-
+/*
 void MonsterControl::updateMonster(float delta)
 {
-	// 第二波
-	if (m_bFlag1 == false && m_bFlag2 == true)
+	bool win;
+	win = (areMonstersAllDie(monsterOneList) && areMonstersAllDie(monsterTwoList));
+	if (win)
 	{
-		bool noMonster = true;
-		for (auto monster : monsterShowList)
-		{
-			if (!monster->IsDead)
-			{
-				noMonster = false;
-			}
-		}
-		if (noMonster)
-		{
-			this->scheduleOnce(schedule_selector(MonsterControl::showSecMon), 4.0f);
+
+	}
+	log("%d", win);
+	log("%d", areMonstersAllDie(monsterOneList));
+	log("%d", areMonstersAllDie(monsterTwoList));
+	if(areMonstersAllDie(monsterOneList))
+	{
+		monsterShowList = monsterTwoList;
+		for (auto monster : monsterShowList) {
+			m_map->addChild(monster);
+			monster->StartListen(m_pHero);
 		}
 	}
 
-	// 第三波
-	if (m_bFlag2 == false && m_bFlag3 == true)
-	{
-		bool noMonster = true;
-		for (auto monster : monsterShowList)
-		{
-			if (!monster->IsDead)
-			{
-				noMonster = false;
-			}
-		}
-		if (noMonster)
-		{
-			this->scheduleOnce(schedule_selector(MonsterControl::showThrMon), 3.0f);
-		}
-	}
 }
 
-void MonsterControl::showSecMon(float delta)
+bool MonsterControl::areMonstersAllDie(Vector<Monster*> Monsterlist)
 {
-	for (auto monster : monsterTwoList)
+	bool noMonster = true;
+	for (auto monster : Monsterlist)
 	{
-		monster->setVisible(true);
-		m_map->addChild(monster);
-		monster->StartListen(m_pHero);
-		monsterShowList.pushBack(monster);
-		m_bFlag2 = false;
+		if (monster->IsDead == false)
+		{
+			noMonster = false;
+		}
 	}
+	return noMonster;
 }
-
-void MonsterControl::showThrMon(float delta)
-{
-	for (auto monster : monsterThreeList)
-	{
-		monster->setVisible(true);
-		m_map->addChild(monster);
-		monster->StartListen(m_pHero);
-		monsterShowList.pushBack(monster);
-		m_bFlag3 = false;
-	}
-}
+*/

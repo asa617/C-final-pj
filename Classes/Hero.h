@@ -61,6 +61,8 @@ public:
 	void initKey();
 	void KeyPressDo(EventKeyboard::KeyCode key);
 
+	void MoveAndRun(float Direction);
+
 	virtual void update(float Delta);
 	CREATE_FUNC(Hero);
 

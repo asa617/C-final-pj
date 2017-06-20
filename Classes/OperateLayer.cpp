@@ -21,6 +21,11 @@ OperateLayer::~OperateLayer()
 bool OperateLayer::init()
 {
 	bool ret = false;
+
+	//添加方向控制
+	m_pJoypad = Joypad::create();
+	addChild(m_pJoypad);
+
 	// 添加攻击按钮
 	m_pAttackButton = CAttackButton::create("Attack.png");
 	m_pAttackButton->setPosition(ccp(m_szWinSize.width - 80, 80));
@@ -83,7 +88,7 @@ void OperateLayer::keyAttackUp(int nButtonType)
 void OperateLayer::setDelegate(ImageScene *pImageScene)
 {
 	m_pImageScene = pImageScene;
-//	m_pJoypad->setGameLayer(pGameLayer);
+	m_pJoypad->setGameLayer(pImageScene);
 }
 
 

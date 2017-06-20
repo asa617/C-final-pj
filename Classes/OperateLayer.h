@@ -42,6 +42,7 @@ private:
 	Size m_szWinSize;
 	Point m_ptCenter;
 
+	Joypad *m_pJoypad;
 	ImageScene *m_pImageScene;
 	CAttackButton *m_pAttackButton;
 	CAttackEffect *m_pAttackButtonA;

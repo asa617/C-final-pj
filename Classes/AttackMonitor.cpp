@@ -64,7 +64,7 @@ bool AttackMonitor::IsHeroAttackTrue(Hero* m_hero, Monster* monster, int attackR
 
 	if (m_hero->HeroPath == true && x <= 0)
 	{
-		if (fabs(x) <= attackRange && fabs(y)<=30)
+		if (fabs(x) <= attackRange && fabs(y)<=50)
 		{
 			return 1;
 		}
@@ -73,7 +73,7 @@ bool AttackMonitor::IsHeroAttackTrue(Hero* m_hero, Monster* monster, int attackR
 	}
 	if (m_hero->HeroPath == false && x >= 0)
 	{
-		if (fabs(x) <= attackRange && fabs(y) <= 30)
+		if (fabs(x) <= attackRange && fabs(y) <= 50)
 		{
 			return 1;
 		}

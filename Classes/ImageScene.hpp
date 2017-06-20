@@ -16,6 +16,7 @@
 #include "Hero.h"
 #include "editor-support/cocostudio/CocoStudio.h"
 #include "SimpleAudioEngine.h"
+#include "Monster.h"
 
 USING_NS_CC;
 USING_NS_CC_EXT;
@@ -34,7 +35,9 @@ public:
 
 	void attackButtonClick(int nAttackType); //按键点击触发动作
 	//virtual void update(float Delta);
-
+	void actionJoypadStart(float degrees);
+	void actionJoypadUpdate(float degrees);
+	void actionJoypadEnded(float degrees);
 	// 暂停
 	void gamePauseCallback(Ref* pSender);
 
@@ -48,7 +51,13 @@ private:
 	bool IsRunning;    //是否奔跑
 	bool DirectionX;   //x轴方向
 	bool DirectionY;   //y轴方向
+	bool monsterFlag;//判断是否已经加载新怪物
 	std::map<cocos2d::EventKeyboard::KeyCode, bool> keys;  //存储keycode状态
+
+	Sprite* BgMap;
+
+	bool areMonstersAllDie(Vector<Monster*> Monsterlist);
+	void updateMonster(float delta);
 };
 
 
