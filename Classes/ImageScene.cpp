@@ -27,7 +27,20 @@ Scene* ImageScene::createScene(){ //创建场景
 bool ImageScene::init(){   //场景初始化
 	if (!Layer::init())
 	return false;
-	//地图载入
+    //更改bgm
+    if (getBoolFromXML(MUSIC_KEY))
+    {
+        if (SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
+        {
+            aduioEngine->pauseBackgroundMusic();
+            aduioEngine->playBackgroundMusic("gameBGM.wav", true);
+        }
+        else
+            aduioEngine->playBackgroundMusic("gameBGM.wav", true);
+    }
+    else
+        aduioEngine->pauseBackgroundMusic();
+    //地图载入
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto BgMap = Sprite::create("level_1_bg.png");
     BgMap->setPosition(getContentSize().width / 2,getContentSize().height / 2);
